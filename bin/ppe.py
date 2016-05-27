@@ -5,8 +5,8 @@ from datetime import datetime
 frm='%Y-%m-%d %H:%M:%S'
 basetime=datetime.strptime("2014-01-01 00:00:00",frm)
 times=[]
-min=18000
-COUNT=24000
+min=0 # record from 0
+COUNT=5000
 c=0
 for line in open("../datas/exportedFromMatlab/study10electric1TimesStr.data"):
     if c < min :
@@ -55,8 +55,8 @@ for line in open("ss.csv"):
     if st > times[-1] and ed > times[0] :
         continue
     plot([st,ed],[500+idx*500,500+idx*500],'k-')
-    plot([st,st],[2000,16000],'k-')
-    plot([ed,ed],[2000,16000],'k-')
+    plot([st,st],[2000,16000],'k--')
+    plot([ed,ed],[2000,16000],'k--')
 
     opens.append(st)
     values.append(500+idx*500)

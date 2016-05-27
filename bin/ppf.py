@@ -2,7 +2,7 @@ import os,sys
 from datetime import datetime
 import math
 #Param
-WINDOW=10
+WINDOW=60
 DELT=3
 
 MINPOWERDIFF=20
@@ -29,32 +29,39 @@ class PowerNode(Node):
         Node.__init__(self,t)
         self.power=power
 
+# t, time
+# device: 2d-array, 1st: open, 2nd: close
 class DevicesNode(Node):
     def __init__(self,t,device,status=True):
         Node.__init__(self,t)
         self.devices=[[],[]]
         if status : self.devices[0] = [device]
         else: self.devices[1] = [device]
-    def findiff(self,plist):
+    def findData(self,plist):
+        if self.pre is None or self.next is None : return None
+        if len(self.devices[0]) + len(self.devices[1]) != 1 : return None
+
         prt=plist.head
-        frm=None
-        dt = DELT
-        while prt is not None :
-            if prt.t > self.t : break
-            if self.t - prt.t < WINDOW :
-                frm = prt
+        rhead=None
+        while prt is not None:
+            if prt.t >= self.t - WINDOW :
+                rhead = prt
                 break
             prt = prt.next
-        if frm is None : return None
-        if self.pre is not None and self.pre.t >= frm.t - DELT : return None
-        diff = 0
-        prt = frm.next
-        while prt is not None and prt.t - self.t < WINDOW and ( self.next is None or prt.t < self.next.t - DELT ) :
-            _diff = prt.power - frm.power
-            if abs(_diff) > MINPOWERDIFF and abs(_diff) > abs(diff):
-                diff = _diff
+        if rhead is None or rhead.t >= self.t + WINDOW or rhead.t < self.pre.t + WINDOW : return None
+
+        while prt is not None and prt.t <= self.t + WINDOW :
             prt = prt.next
-        return diff
+        if prt is None : return None
+        rtail = prt.pre
+        if rtail == rhead or rtail.t > self.next.t - WINDOW : return None
+
+        return (rhead,rtail)
+
+    def findiff(self,plist):
+        result = self.findData(plist)
+        if result is None : return None
+        return result[1].power - result[0].power
 
 class List:
     def __init__(self):
