@@ -15,6 +15,9 @@ keys=('waterheater2:basement', 'l004:kitchen', 'dishwasher:kitchen', 'l021:upsta
       'l019:kitchen', 'l018:livingroom', 'toaster:kitchen', 'downsink:bathroom', 'l007:bathroom', 'l014:livingroom',
       'heatingindoorunit:house', 'fridge:kitchen', 'l006:kitchen', 'dryer:basement', 'heatingoutdoorunit:house')
 
+ignores = (
+    'uptoilet:upstairs','shower:bathroom','downtoilet:bathroom','upsink:upstairs','downsink:bathroom',
+)
 class Node:
     def __init__(self,t):
         self.pre=self.next=None
@@ -37,6 +40,7 @@ class DevicesNode(Node):
         self.devices=[[],[]]
         if status : self.devices[0] = [device]
         else: self.devices[1] = [device]
+        self.status = status
     def findData(self,plist):
         if self.pre is None or self.next is None : return None
         if len(self.devices[0]) + len(self.devices[1]) != 1 : return None
@@ -61,7 +65,10 @@ class DevicesNode(Node):
     def findiff(self,plist):
         result = self.findData(plist)
         if result is None : return None
-        return result[1].power - result[0].power
+        diff=result[1].power - result[0].power
+        if self.status and diff > 0 : return diff
+        if not self.status and diff < 0 : return diff
+        return 0
 
 class List:
     def __init__(self):
@@ -132,33 +139,6 @@ class PowerList(List):
         self.delt=delt
     def addPower(self,t,power):
         self.addFromTail(PowerNode(t,power))
-    def find_diffs(self,t,win=None):
-        prt=self.head
-        frm=None
-        dt = self.delt
-        while prt is not Node :
-            if prt.t > t : break
-            _dt = t - prt.t
-            if _dt <= dt:
-                dt = _dt
-                frm = prt
-        if frm is None : return None
-        if win is None or win > self.win : win = self.win
-
-        diff=None
-        while prt is not None and prt.next is not None:
-            if prt.t < t :
-                prt=prt.next
-                continue
-            if prt.t - t < self.win :
-                diff=prt.next.power - prt.power
-                if diff > MINPOWERDIFF : return diff
-                elif diff < -MINPOWERDIFF : return diff
-                else: diff = 0
-            else:
-                return diff
-            prt=prt.next
-        return diff
 
 class DevicesStatusList(List):
     def addDevicesStatus(self,did,start,end):
@@ -179,7 +159,7 @@ dlist = DevicesStatusList()
 
 for line in open("ss.csv"):
     data=[int(x) for x in line.rstrip().split("\t")]
-    if len(data) == 3:
+    if len(data) == 3 and keys[int(data[2])] not in ignores:
         dlist.addDevicesStatus(data[2],data[0],data[1])
 
 # init Power List
@@ -190,6 +170,13 @@ for line in open("electric.csv"):
     plist.addPower(*data)
 
 print "-------------------------"
+node = dlist.head
+while node.next is not None:
+    dt = node.next.t - node.t
+    if dt < 30 :
+        print node.devices , node.next.devices,dt
+    node = node.next
+sys.exit(1)
 # first Time
 node = dlist.head
 pdevices={}
