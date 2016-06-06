@@ -10,7 +10,7 @@ keys=('waterheater2:basement', 'l004:kitchen', 'dishwasher:kitchen', 'l021:upsta
       'l019:kitchen', 'l018:livingroom', 'toaster:kitchen', 'downsink:bathroom', 'l007:bathroom', 'l014:livingroom',
       'heatingindoorunit:house', 'fridge:kitchen', 'l006:kitchen', 'dryer:basement', 'heatingoutdoorunit:house')
 ignores = (
-    'uptoilet:upstairs','shower:bathroom','downtoilet:bathroom','upsink:upstairs','downsink:bathroom','fridge:kitchen',
+#    'uptoilet:upstairs','shower:bathroom','downtoilet:bathroom','upsink:upstairs','downsink:bathroom','fridge:kitchen',
 )
 
 frm='%Y-%m-%d %H:%M:%S'
@@ -74,7 +74,7 @@ def draw_dr_datas(event=None):
                 disps.append(plot([data[0],data[1]],[y,y],'k-')[0])
                 disps.append(plot([data[0],data[0]],vv,'k--')[0])
                 disps.append(plot([data[1],data[1]],vv,'k--')[0])
-                disps.append(annotate(keys[key],
+                disps.append(annotate("%d-%s" % (key,keys[key]),
                     xy=((data[1]+data[0])/2,y), xycoords='data',
                     xytext=((data[1]+data[0])/2,y+dy/3), textcoords='data',
                     horizontalalignment="left",

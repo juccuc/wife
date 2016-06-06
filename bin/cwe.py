@@ -18,10 +18,15 @@ for line in open("../datas/exportedFromMatlab/study10waterColdTimesStr.data"):
 
 values=[]
 c=0
+old=None
+
 for line in open("../datas/exportedFromMatlab/study10waterColdvalues.data"):
     if c < min :
         c += 1
         continue
+    data = float(line.rstrip())
+    if old is None :
+        
     values.append(float(line.rstrip()))
     if len(values) >= COUNT:
         break

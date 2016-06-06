@@ -6,6 +6,8 @@ values=[]
 aa=[]
 vv=[]
 ma=0
+counts=[0] * 9
+
 for line in open("electric.csv"):
     data=tuple([ int(x) for x in line.rstrip().split("\t")])
     if before is not None and data[1] - before[1] >= 100:
@@ -19,9 +21,11 @@ for line in open("electric.csv"):
         print "-"*30,len(aa),data
         vv.append(len(aa))
         if len(aa) > ma : ma =len(aa)
+        counts[len(aa)-1] += 1
         aa=[]
     before=data
 print ma,vv
+print counts
 # from pylab import *
 # plot(np.array(times),np.array(values))
 # show()
