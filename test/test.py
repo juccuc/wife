@@ -1,16 +1,15 @@
-from pylab import *
-from datetime import datetime,timedelta
 
-frm='%Y-%m-%d %H:%M:%S.%f'
+text=[]
+fmt=""
 
-X=drange(datetime.strptime("2014-02-09 21:12:10.000000",frm),
-              datetime.strptime("2014-02-22 10:57:04.000000",frm),timedelta(seconds=1));
-print X.size
+sql="insert into risk_factor_summary values "
+s=sql
+f=open("vv.sql","w")
 
-def aa(t):
-    print type(t),t
-    return 1
-Y=np.fromfunction(aa,)
 
-plot(X,Y,color="blue")
-show()
+for i in xrange(1,len(text)):
+    s = fmt % tuple(text[i])
+    f.write(sql + s[:-1] + ";\n")
+
+
+f.close()

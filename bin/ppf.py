@@ -2,7 +2,7 @@ import os,sys
 from datetime import datetime
 import math
 #Param
-WINDOW=60
+WINDOW=30
 DELT=3
 
 MINPOWERDIFF=20
@@ -170,13 +170,13 @@ for line in open("electric.csv"):
     plist.addPower(*data)
 
 print "-------------------------"
-node = dlist.head
-while node.next is not None:
-    dt = node.next.t - node.t
-    if dt < 30 :
-        print node.devices , node.next.devices,dt
-    node = node.next
-sys.exit(1)
+# node = dlist.head
+# while node.next is not None:
+#     dt = node.next.t - node.t
+#     if dt < 30 :
+#         print node.devices , node.next.devices,dt
+#     node = node.next
+# sys.exit(1)
 # first Time
 node = dlist.head
 pdevices={}

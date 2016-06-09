@@ -1,7 +1,9 @@
-__author__ = 'yaowei'
-import os,sys
-from datetime import datetime
+from pylab import *
 
+datas=[]
+df = None
+MIN=80
+GT=5
 keys=('waterheater2:basement', 'l004:kitchen', 'dishwasher:kitchen', 'l021:upstairs',
       'l012:nursery', 'oven:kitchen', 'humidifier1:upstairs', 'uptoilet:upstairs',
       'kitchensink:kitchen', 'l011:bedroom', 'microwave:kitchen', 'l002:kitchen',
@@ -13,92 +15,109 @@ ignores = (
 #    'uptoilet:upstairs','shower:bathroom','downtoilet:bathroom','upsink:upstairs','downsink:bathroom','fridge:kitchen',
 )
 
-frm='%Y-%m-%d %H:%M:%S'
-basetime=datetime.strptime("2014-01-01 00:00:00",frm)
+class Device:
+    def __init__(self,name,power,std,dur=5):
+        self.name = name
+        self.power = power
+        self.std = std
+        self.dur = dur
+        self.status = -1        # -1 unknow 0 close 1 open
+    def validDf(self,idx):
+        global dfs
+
+        base=idx
+        df=dfs[idx]
+        df_t = df[2]-df[0]
+        df_v = df[3]-df[1]
+
+        ret=0
+        minDT=self.std
+
+        while True :
+            if df_t > self.dur : break
+            if df_v <= -self.power + self.std and df_v >= -self.power - self.std :
+                if ret == 0 or abs(df_v + self.power) < minDT :
+                    ret = -(idx - base + 1)
+                    minDT = abs(df_v + self.power)
+            if df_v <= self.power + self.std and df_v >= self.power - self.std :
+                if ret == 0 or abs(df_v - self.power) < minDT :
+                    ret = idx-base+1
+                    minDT = abs(df_v - self.power)
+            idx += 1
+            if idx >= len(dfs) : break
+            ndf = dfs[idx]
+            df_t = ndf[2] - df[0]
+            df_v = ndf[3] - df[1]
+        return ret
+
+class Dryer(Device):
+    def __init__(self,name) :
+        Device.__init__(self,name,(4882,),(43,),durations=(2,15))
+
+    def validDf(self,df):
+        pass
+
+devices= (
+    Device("HeatingIndoor",10206,1500,60),
+    Device("Humidifier",1470,112),
+    Device("Waterheater",4391,504),
+)
+
+dfs = []
 times=[]
-min=0 # record from 0
-COUNT=1500000
-c=0
-for line in open("../datas/exportedFromMatlab/study10electric1TimesStr.data"):
-    if c < min :
-        c += 1
-        continue
-    times.append(int((datetime.strptime(line[19:-1].replace("\t"," "),frm) - basetime).total_seconds()))
-    if len(times) >= COUNT :
-        break
-
 values=[]
-c=0
-for line in open("../datas/exportedFromMatlab/study10electric1values.data"):
-    if c < min :
-        c += 1
-        continue
-    values.append(int(line.rstrip()))
-    if len(values) >= COUNT:
+for line in open("../electric.csv"):
+    datas.append([ int(x) for x in line.rstrip().split("\t") ])
+    times.append(datas[-1][0])
+    values.append(datas[-1][1])
+    if len(datas) > 1 :
+        if datas[-1][0] - datas[-2][0] <= GT and abs(datas[-1][1] - datas[-2][1]) > 80:
+            if df is not None:
+                df[2],df[3] = datas[-1]
+            else:
+                df = [datas[-2][0],datas[-2][1],datas[-1][0],datas[-1][1]]
+        elif df is not None:
+            if abs(df[3]-df[1]) > 80:
+                dfs.append(df)
+            df=None
+idx = 0
+adds_lines = [
+    (3542411,-1,0,12644) , (3585032,-1,0,11008)
+]
+for line in adds_lines:
+    plot([line[0],line[0]+line[1]],[line[3],line[3] + line[1] * devices[line[2]].power],'k-',color="r",linewidth=5)
+
+mdatas = [[]] * len(devices)
+
+while idx < len(dfs):
+    for index,device in enumerate(devices):
+        ret=device.validDf(idx)
+        if ret != 0 :
+            print dfs[idx:idx+abs(ret)],ret,device.name
+            mdatas[index].append((idx,ret))
+            if ret > 0 :
+                plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="r",linewidth=5)
+            else:
+                plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="yellow",linewidth=5)
+            idx += abs(ret)
+        else :
+            idx += 1
         break
-index = 0
 
-c=0
-for line in open("../datas/exportedFromMatlab/study10electric2values.data"):
-    if c < min :
-        c += 1
-        continue
-    values[index] += int(line.rstrip())
-    index += 1
-    if index >= COUNT: break
-
-# for index in xrange(0,len(times)):
-#     print "%d\t%d" % (times[index],values[index])
-
-wtimes=[]
-c=0
-# for line in open("../datas/exportedFromMatlab/study10waterColdTimesStr.data"):
-#     if c < min :
-#         c += 1
-#         continue
-#     wtimes.append(int((datetime.strptime(line[19:-1].replace("\t"," "),frm) - basetime).total_seconds()))
-#     if len(wtimes) >= COUNT :
-#         break
-
-cvalues=[]
-c=0
-old=None
-w_factor=20000
-
-# for line in open("../datas/exportedFromMatlab/study10waterColdvalues.data"):
-#     if c < min :
-#         c += 1
-#         continue
-#     # data = float(line.rstrip())
-#     # if old is None :
-#
-#     cvalues.append(float(line.rstrip()) * w_factor)
-#     if len(cvalues) >= COUNT:
-#         break
-# hvalues=[]
-# c=0
-# for line in open("../datas/exportedFromMatlab/study10waterHotvalues.data"):
-#     if c < min :
-#         c += 1
-#         continue
-#     hvalues.append(float(line.rstrip()) * w_factor)
-#     if len(hvalues) >= COUNT:
-#         break
-
+figure(2)
+mtimes=[]
+mvalues=[]
+for mdata in mdatas[0]:
 
 dlist=[]
-for line in open("ss.csv"):
+for line in open("../ss.csv"):
     data=[ int(x) for x in line.rstrip().split("\t") ]
     if keys[data[2]] in ignores : continue
     dlist.append(data)
 
-from pylab import *
 plot(np.array(times),np.array(values))
-# plot(np.array(wtimes),np.array(cvalues),color='g')
-# plot(np.array(wtimes),np.array(hvalues),color='r')
 
 disps=[]
-
 dr_datas={}
 def draw_dr_datas(event=None):
     if len(dr_datas) > 0 :
@@ -138,15 +157,6 @@ def draw(event):
 
         if event.xdata < dlist[indx][0] : break
     draw_dr_datas(event)
-
-# figure(1).canvas.mpl_connect('button_press_event',onClick)
-def removeAll(event=None):
-    global  disps,dr_datas
-    for play in disps :
-        play.remove()
-    disps=[]
-    figure(1).canvas.draw()
-
 def showValue(xdata):
     last = 0
     for idx in xrange(0,len(times)):
@@ -174,11 +184,18 @@ def showDiff(event):
     b = showValue(event.xdata+WINDOW)
     print a,b , b[0]-a[0],b[1]-a[1]
 
+def removeAll(event=None):
+    global  disps,dr_datas
+    for play in disps :
+        play.remove()
+    disps=[]
+    dr_datas={}
+    figure(1).canvas.draw()
+
 def onPress(event):
     global dr_datas
     if event.key == 'x':
         removeAll(event)
-        dr_datas={}
         return
     if event.key == 'd':
         removeAll(event)
@@ -206,33 +223,5 @@ def onPress(event):
         figure(1).canvas.draw()
         return
 figure(1).canvas.mpl_connect('key_press_event',onPress)
-
-# opens=[]
-# closes=[]
-# values=[]
-# texts=[]
-# for line in open("ss.csv"):
-#     data=line.rstrip().split("\t")
-#     st=int(data[0])
-#     ed=int(data[1])
-#     idx=int(data[2])
-#     if keys[idx] in ignores : continue
-#     if st < times[0] and ed < times[0] : continue
-#     if st > times[-1] and ed > times[0] :
-#         continue
-#     plot([st,ed],[500+idx*500,500+idx*500],'k-')
-#     plot([st,st],[2000,16000],'k--')
-#     plot([ed,ed],[2000,16000],'k--')
-#
-#     opens.append(st)
-#     values.append(500+idx*500)
-#     closes.append(ed)
-#     texts.append(idx)
-# # plot(opens,values,marker='+',color='r',ls='')
-# # plot(closes,values,marker='x',color='r',ls='')
-#
-#
-# for idx in texts:
-#     text(times[0]-10000,idx*500+500,keys[idx])
 
 show()

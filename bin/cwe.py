@@ -16,18 +16,19 @@ for line in open("../datas/exportedFromMatlab/study10waterColdTimesStr.data"):
     if len(times) >= COUNT :
         break
 
+
 values=[]
 c=0
 old=None
-
+w_factor = 20000
 for line in open("../datas/exportedFromMatlab/study10waterColdvalues.data"):
     if c < min :
         c += 1
         continue
-    data = float(line.rstrip())
-    if old is None :
-        
-    values.append(float(line.rstrip()))
+    # data = float(line.rstrip())
+    # if old is None :
+
+    values.append(float(line.rstrip())*w_factor)
     if len(values) >= COUNT:
         break
 values_h=[]
@@ -36,7 +37,7 @@ for line in open("../datas/exportedFromMatlab/study10waterHotvalues.data"):
     if c < min :
         c += 1
         continue
-    values_h.append(float(line.rstrip()))
+    values_h.append(float(line.rstrip())*w_factor)
     if len(values_h) >= COUNT:
         break
 
