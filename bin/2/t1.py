@@ -93,21 +93,20 @@ while idx < len(dfs):
     for index,device in enumerate(devices):
         ret=device.validDf(idx)
         if ret != 0 :
-            print dfs[idx:idx+abs(ret)],ret,device.name
             mdatas[index].append((idx,ret))
-            if ret > 0 :
-                plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="r",linewidth=5)
-            else:
-                plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="yellow",linewidth=5)
-            idx += abs(ret)
-        else :
-            idx += 1
-        break
+            if index == 0 :
+                print dfs[idx:idx+abs(ret)],ret,device.name
+                if ret > 0 :
+                    plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="r",linewidth=5)
+                else:
+                    plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="yellow",linewidth=5)
+            idx += abs(ret) - 1
+    idx += 1
 
-figure(2)
-mtimes=[]
-mvalues=[]
-for mdata in mdatas[0]:
+# figure(2)
+# mtimes=[]
+# mvalues=[]
+# for mdata in mdatas[0]:
 
 dlist=[]
 for line in open("../ss.csv"):
