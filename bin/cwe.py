@@ -5,8 +5,8 @@ from datetime import datetime
 frm='%Y-%m-%d %H:%M:%S'
 basetime=datetime.strptime("2014-01-01 00:00:00",frm)
 times=[]
-min=24000 # record from 0
-COUNT=100000
+min=0 # record from 0
+COUNT=100000000
 c=0
 for line in open("../datas/exportedFromMatlab/study10waterColdTimesStr.data"):
     if c < min :
