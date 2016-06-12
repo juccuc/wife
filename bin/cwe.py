@@ -20,7 +20,7 @@ for line in open("../datas/exportedFromMatlab/study10waterColdTimesStr.data"):
 values=[]
 c=0
 old=None
-w_factor = 20000
+w_factor = 10000
 for line in open("../datas/exportedFromMatlab/study10waterColdvalues.data"):
     if c < min :
         c += 1
@@ -40,6 +40,15 @@ for line in open("../datas/exportedFromMatlab/study10waterHotvalues.data"):
     values_h.append(float(line.rstrip())*w_factor)
     if len(values_h) >= COUNT:
         break
+f=open("../datas/a/cold","w")
+for key,value in zip(times,values):
+    f.write("%d\t%d\n" % (key,int(value)))
+f.close()
+
+f=open("../datas/a/hot","w")
+for key,value in zip(times,values_h):
+    f.write("%d\t%d\n" % (key,int(value)))
+f.close()
 
 from pylab import *
 plot(np.array(times),np.array(values),color='b')

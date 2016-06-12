@@ -59,7 +59,8 @@ class Dryer(Device):
 
 devices= (
     Device("HeatingIndoor",10206,1500,60),
-    Device("Humidifier",1470,112),
+    Device("Microwave",1681,52,10),
+    Device("Humidifier",1470,112,10),
     Device("Waterheater",4391,504),
 )
 
@@ -82,7 +83,7 @@ for line in open("../electric.csv"):
             df=None
 idx = 0
 adds_lines = [
-    (3542411,-1,0,12644) , (3585032,-1,0,11008)
+    # (3542411,-1,0,12644) , (3585032,-1,0,11008)
 ]
 for line in adds_lines:
     plot([line[0],line[0]+line[1]],[line[3],line[3] + line[1] * devices[line[2]].power],'k-',color="r",linewidth=5)
@@ -94,13 +95,14 @@ while idx < len(dfs):
         ret=device.validDf(idx)
         if ret != 0 :
             mdatas[index].append((idx,ret))
-            if index == 0 :
+            if index == 1 :
                 print dfs[idx:idx+abs(ret)],ret,device.name
                 if ret > 0 :
                     plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="r",linewidth=5)
                 else:
                     plot([dfs[idx][0],dfs[idx+abs(ret)-1][2]],[dfs[idx][1],dfs[idx+abs(ret)-1][3]],'k-',color="yellow",linewidth=5)
             idx += abs(ret) - 1
+            break
     idx += 1
 
 # figure(2)
@@ -176,11 +178,26 @@ def showValue(xdata):
     return (times[idx],values[idx])
 
 def showDiff(event):
-    WINDOW=20
-    disps.append(plot([event.xdata-WINDOW,event.xdata-WINDOW],figure(1).axes[0].get_ylim(),'k--')[0])
-    disps.append(plot([event.xdata+WINDOW,event.xdata+WINDOW],figure(1).axes[0].get_ylim(),'k--')[0])
+    xlim=figure(1).axes[0].get_xlim()
+    ylim=figure(1).axes[0].get_ylim()
+    WINDOW=(xlim[1]-xlim[0])/10
+    disps.append(plot([event.xdata-WINDOW,event.xdata-WINDOW],ylim,'k--')[0])
+    disps.append(plot([event.xdata+WINDOW,event.xdata+WINDOW],ylim,'k--')[0])
     a = showValue(event.xdata-WINDOW)
     b = showValue(event.xdata+WINDOW)
+    # disps.append(annotate("%d,%d" % (times[idx],values[idx]),
+    #     xy=(times[idx],values[idx]), xycoords='data',
+    #     xytext=(times[idx],values[idx]+300), textcoords='data',
+    #                 horizontalalignment="left",
+    #                 arrowprops=dict(arrowstyle="simple",
+    #                     connectionstyle="arc3,rad=-0.2"),
+    #                 bbox=dict(boxstyle="round", facecolor="w",
+    #                 edgecolor="0.5", alpha=0.9)
+    #             ))
+    bbox_props = dict(boxstyle="round,pad=0.3", fc="cyan", ec="b", lw=2)
+    disps.append(text(event.xdata, event.ydata, "%d - %d" % (b[0]-a[0],b[1]-a[1]), ha="center", va="center",
+                size=12,
+                bbox=bbox_props))
     print a,b , b[0]-a[0],b[1]-a[1]
 
 def removeAll(event=None):
