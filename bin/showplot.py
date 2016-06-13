@@ -41,10 +41,12 @@ def showPlot(data,**kwargs) :
 edatas=readFileData("../datas/a/electric01",START,COUNT)
 hdatas=readFileData("../datas/a/hot.2",START,COUNT)
 cdatas=readFileData("../datas/a/cold.2",START,COUNT)
+chdatas=readFileData("../datas/a/cold.hot.2",START,COUNT)
 
 showPlot(edatas,color="purple")
 showPlot(cdatas,color="blue")
 showPlot(hdatas,color="r")
+showPlot(chdatas,color="green")
 
 dlist=[]
 for line in open("ss.csv"):
@@ -162,6 +164,10 @@ def onPress(event):
         return
     if event.key == 'g':
         showValue(event.xdata,cdatas)
+        figure(1).canvas.draw()
+        return
+    if event.key == 't':
+        showValue(event.xdata,chdatas)
         figure(1).canvas.draw()
         return
     if event.key == 'a':
