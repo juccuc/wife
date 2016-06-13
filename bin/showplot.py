@@ -102,32 +102,36 @@ def removeAll(event=None):
     disps=[]
     figure(1).canvas.draw()
 
-# def showValue(xdata):
-#     last = 0
-#     for idx in xrange(0,len(times)):
-#         if times[idx] >= xdata:
-#             break
-#         last = idx
-#     if xdata - times[last] < times[idx] - xdata : idx = last
-#     disps.append(annotate("%d,%d" % (times[idx],values[idx]),
-#         xy=(times[idx],values[idx]), xycoords='data',
-#         xytext=(times[idx],values[idx]+300), textcoords='data',
-#                     horizontalalignment="left",
-#                     arrowprops=dict(arrowstyle="simple",
-#                         connectionstyle="arc3,rad=-0.2"),
-#                     bbox=dict(boxstyle="round", facecolor="w",
-#                     edgecolor="0.5", alpha=0.9)
-#                 ))
-#     # figure(1).canvas.draw()
-#     return (times[idx],values[idx])
+def showValue(xdata,datas):
+    last = 0
+    for idx in xrange(0,len(datas)):
+        if datas[idx][0] >= xdata:
+            break
+        last = idx
+    if xdata - datas[last][0] < datas[idx][0] - xdata : idx = last
+    disps.append(annotate("%d,%d" % (datas[idx][0],datas[idx][1]),
+        xy=(datas[idx][0],datas[idx][1]), xycoords='data',
+        xytext=(datas[idx][0],datas[idx][1]+300), textcoords='data',
+                    horizontalalignment="left",
+                    arrowprops=dict(arrowstyle="simple",
+                        connectionstyle="arc3,rad=-0.2"),
+                    bbox=dict(boxstyle="round", facecolor="w",
+                    edgecolor="0.5", alpha=0.9)
+                ))
+    # figure(1).canvas.draw()
+    return datas[idx]
 
 def showDiff(event):
     WINDOW=20
     disps.append(plot([event.xdata-WINDOW,event.xdata-WINDOW],figure(1).axes[0].get_ylim(),'k--')[0])
     disps.append(plot([event.xdata+WINDOW,event.xdata+WINDOW],figure(1).axes[0].get_ylim(),'k--')[0])
-    # a = showValue(event.xdata-WINDOW)
-    # b = showValue(event.xdata+WINDOW)
-    # print a,b , b[0]-a[0],b[1]-a[1]
+    a = showValue(event.xdata-WINDOW,hdatas)
+    b = showValue(event.xdata+WINDOW,hdatas)
+    print "hot water:" ,a,b , b[0]-a[0],b[1]-a[1]
+
+    a = showValue(event.xdata-WINDOW,cdatas)
+    b = showValue(event.xdata+WINDOW,cdatas)
+    print "cold water:" ,a,b , b[0]-a[0],b[1]-a[1]
 
 def onPress(event):
     global dr_datas
@@ -153,8 +157,12 @@ def onPress(event):
         figure(1).canvas.draw()
         return
     if event.key == 'f':
-        # showValue(event.xdata)
-        # figure(1).canvas.draw()
+        showValue(event.xdata,hdatas)
+        figure(1).canvas.draw()
+        return
+    if event.key == 'g':
+        showValue(event.xdata,cdatas)
+        figure(1).canvas.draw()
         return
     if event.key == 'a':
         showDiff(event)
