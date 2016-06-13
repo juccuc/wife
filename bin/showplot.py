@@ -35,7 +35,7 @@ def readFileData(filename,start=0,count=-1):
     return datas
 def showPlot(data,**kwargs) :
     datas = zip(*data)
-    plot(datas[0],datas[1],**kwargs)
+    return plot(datas[0],datas[1],**kwargs)
     
 
 edatas=readFileData("../datas/a/electric01",START,COUNT)
@@ -43,11 +43,12 @@ hdatas=readFileData("../datas/a/hot.2",START,COUNT)
 cdatas=readFileData("../datas/a/cold.2",START,COUNT)
 chdatas=readFileData("../datas/a/cold.hot.2",START,COUNT)
 
-showPlot(edatas,color="purple")
-showPlot(cdatas,color="blue")
-showPlot(hdatas,color="r")
-showPlot(chdatas,color="green")
+eplot = showPlot(edatas,color="purple",label="Electic")
+cplot = showPlot(cdatas,color="blue",label="Cold Water")
+hplot = showPlot(hdatas,color="r",label="Hot Water")
+chplot = showPlot(chdatas,color="green" , label = "Cold+Hot Water")
 
+legend()
 dlist=[]
 for line in open("ss.csv"):
     data=[ int(x) for x in line.rstrip().split("\t") ]
