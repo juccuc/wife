@@ -38,12 +38,12 @@ def showPlot(data,**kwargs) :
     return plot(datas[0],datas[1],**kwargs)
     
 
-edatas=readFileData("../datas/a/electric01",START,COUNT)
+# edatas=readFileData("../datas/a/electric01",START,COUNT)
 hdatas=readFileData("../datas/a/hot.2",START,COUNT)
 cdatas=readFileData("../datas/a/cold.2",START,COUNT)
 chdatas=readFileData("../datas/a/cold.hot.2",START,COUNT)
 
-eplot = showPlot(edatas,color="purple",label="Electic")
+# eplot = showPlot(edatas,color="purple",label="Electic")
 cplot = showPlot(cdatas,color="blue",label="Cold Water")
 hplot = showPlot(hdatas,color="r",label="Hot Water")
 chplot = showPlot(chdatas,color="green" , label = "Cold+Hot Water")
@@ -177,32 +177,32 @@ def onPress(event):
         return
 figure(1).canvas.mpl_connect('key_press_event',onPress)
 
-# opens=[]
-# closes=[]
-# values=[]
-# texts=[]
-# for line in open("ss.csv"):
-#     data=line.rstrip().split("\t")
-#     st=int(data[0])
-#     ed=int(data[1])
-#     idx=int(data[2])
-#     if keys[idx] in ignores : continue
-#     if st < times[0] and ed < times[0] : continue
-#     if st > times[-1] and ed > times[0] :
-#         continue
-#     plot([st,ed],[500+idx*500,500+idx*500],'k-')
-#     plot([st,st],[2000,16000],'k--')
-#     plot([ed,ed],[2000,16000],'k--')
-#
-#     opens.append(st)
-#     values.append(500+idx*500)
-#     closes.append(ed)
-#     texts.append(idx)
-# # plot(opens,values,marker='+',color='r',ls='')
-# # plot(closes,values,marker='x',color='r',ls='')
-#
-#
-# for idx in texts:
-#     text(times[0]-10000,idx*500+500,keys[idx])
+start=None
+end=None
+result=[]
+idx = 0
+while idx < len(chdatas):
+    data = chdatas[idx]
+    if data[1] > 1920:
+        if start is None :
+            start = data
+        end = data
+    elif end is not None:
+        data=chdatas[idx-1]
+        if data[0] - start[0] > 10 :
+            if len(result) > 0 and start[0] - result[-1][1][0]  < 30:
+                result[-1][1] = data
+            else:
+                result.append([start,data])
+        start = end = None
+    idx += 1
 
+idx = 0
+while idx < len(result):
+    data=result[idx]
+    plot([data[0][0],data[0][0]],[0,data[0][1]],'k-',color="r",linewidth=5)
+    plot([data[1][0],data[1][0]],[0,data[1][1]],'k-',color="yellow",linewidth=5)
+    idx += 1
+xlabel("Seconds")
+ylabel("Water Flow Rate")
 show()
