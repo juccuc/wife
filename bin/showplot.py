@@ -205,4 +205,43 @@ while idx < len(result):
     idx += 1
 xlabel("Seconds")
 ylabel("Water Flow Rate")
+
+#
+locations = [26421,
+112781,
+112782,
+26420,
+294210,
+152328,
+294211,
+166008,
+288359,
+431970,
+288361,
+288360,
+198869,
+243926,
+410810,
+152280,
+431971,
+152329,
+243927,
+198871,
+198870,
+243928,
+166060,
+410811,
+410812,
+431972,
+166061,
+166062,
+24565,
+24566,
+24567]
+
+datas=readFileData("../datas/a/cold",START,COUNT)
+# plt.plot(np.arange(0, len(chdatas), 1),np.asarray(chdatas),color='blue')
+for item in locations:
+    tmp=zip(*datas[item:item+50])
+    plot(tmp[0], tmp[1], color="grey", linewidth=2)
 show()
